@@ -1,0 +1,1 @@
+cat wgbs_sample_list.txt | parallel -j 20 --gnu --plus "/opt/bedtools/bedtools2/bin/bedtools intersect -header -v -a wgbs_methyl_results/{}.bismark.cov.gz -b db/hg38_v3.bed -wa > s1_bl_filter/{}_rmBL.bismark.cov;"

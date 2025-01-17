@@ -1,0 +1,1 @@
+ls -1 s2_cov_gte5/ | parallel -j 20 --gnu --plus "/opt/bedtools/bedtools2/bin/bedtools intersect -header -v -a s2_cov_gte5/{} -b db/SAS_gMAF_GTE0.01.bed -wa > s3_bl_SAS_filter/{%_rmBL_cov5.bismark.cov}_rmBL_cov5_SAS.bismark.cov;"
