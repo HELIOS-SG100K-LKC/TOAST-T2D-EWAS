@@ -66,4 +66,4 @@ summary_results <- summary_results %>%
   )
 
 summary_results_filt <- summary_results %>% filter(Sentinel_CpGs>0)
-summary_results_filt$P_Adjusted <- p.adjust(summary_results_filt$Hypergeom_P,method = "bonferroni")
+summary_results_filt$P_Adjusted <- p.adjust(summary_results_filt$Hypergeom_P,method = "fdr")
