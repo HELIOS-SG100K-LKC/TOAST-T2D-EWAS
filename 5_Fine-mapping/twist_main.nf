@@ -62,7 +62,7 @@ process trim_galore {
     echo true
 
     input:
-     tuple val(sample_id), file(reads) from read_pairs_ch2
+    tuple val(sample_id), file(reads) from read_pairs_ch2
 
     output:
     tuple val(sample_id), file('*_R1.150bp_5prime.fq.gz'), file('*_R2.150bp_5prime.fq.gz') into ch_trimmed_reads_for_bwaMeth
