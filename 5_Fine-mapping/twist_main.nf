@@ -28,7 +28,7 @@ GENOME_HG19_PATH="${prjPath}/${toolsDir}/ref_genome/hg19/"
 BAIT_INTERVAL_PATH="${prjPath}/${toolsDir}/ref_genome/covered_target_bed/toast/"
 TARGET_PATH="${prjPath}/${toolsDir}/ref_genome/covered_target_bed/toast/"
 
-// the sample to be analyzed
+// the samples to be analyzed
 read_pairs_ch = Channel.fromFilePairs("${baseDir}/$rawFASTQ/*_R{1,2}.fq.gz")
 read_pairs_ch2 = Channel.fromFilePairs("${baseDir}/$rawFASTQ/*_R{1,2}.fq.gz")  
 
