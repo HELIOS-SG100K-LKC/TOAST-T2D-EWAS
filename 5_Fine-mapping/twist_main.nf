@@ -208,7 +208,6 @@ process methylDackel {
     """
     
     ${METHYLDACKEL_PATH}/MethylDackel extract -@ 4 --keepDupes --minDepth 10 --maxVariantFrac 0.25 --OT 0,0,0,138 --OB 0,0,13,0 --mergeContext ${GENOME_HG19_PATH}/hg19.fa ${bam_file} -o ${sample_id}
-    awk 'BEGIN {FS=OFS="\t"} NR == 1 {print \$0} NR > 1 {print \$1,\$2,\$3,((\$5/(\$5+\$6)*100)+0),\$5,\$6;}' OFMT="%.2f" ${sample_id}_CpG.bedGraph > ${sample_id}_CpG_processed.bedGraph
     ${METHYLDACKEL_PATH}/MethylDackel extract -@ 4 --keepDupes --minDepth 10 --maxVariantFrac 0.25 --OT 0,0,0,138 --OB 0,0,13,0 --cytosine_report --CHH --CHG ${GENOME_HG19_PATH}/hg19.fa ${bam_file} -o ${sample_id}_report
 
     """
