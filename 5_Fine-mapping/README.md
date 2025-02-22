@@ -1,3 +1,2 @@
-Code for 
-1. Finemapping analysis
-2. Enrichment analysis
+Code for TWIST Finemapping analysis
+
