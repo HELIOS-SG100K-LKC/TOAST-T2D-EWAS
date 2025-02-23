@@ -1,0 +1,157 @@
+#read variables
+variable_list <- read.csv("../../Sentinel_323nRandomset/Sentinel_Grp_variable.csv", header = T)
+
+#read effect of beta
+#on local
+eff <- read.csv("../../Sentinel_TOAST_eff_phewas.csv")
+#on nscc
+#eff <- read.csv("../../Sentinel_323nRandomset/Sentinel_TOAST_eff_phewas.csv")
+#colnames(eff)[1] <- "CpG"
+
+#Begin extraction for sentinal cpgs
+Enrichment_323sentinel_summary <- data.frame()
+
+for (i in 1:nrow(variable_list)){
+
+  print(i)
+  
+  timestamp()
+
+grp <- variable_list[i,1]
+variable <- variable_list[i,2]
+
+temp_Markernames_file = "../../Sentinel_TOAST_eff_phewas.csv"
+Markernames <- read.csv(temp_Markernames_file, header = T)
+colnames(Markernames)[1] <- "CpG"
+cpg_323 = as.character(Markernames$CpG)
+
+res_EWAS <- read.csv(paste0("../",grp,"/",variable,"_HELIOS_EWAS_",grp,".csv"))
+#res_323sentinel <- read.csv(paste0("../../Sentinel_and_PCs_CpG_regression_phewas_PRS/Bioimpedance/Random_323sentinel/323sentinel_DBI13_Height_results_linear_regression_HELIOS_CpG_Bioimpedance_meanlog.csv"))
+#res_323sentinel <- read.csv(paste0("../../Sentinel_and_PCs_CpG_regression_phewas_PRS/",grp,"/Random_323sentinel/323sentinel_",variable,"_results_linear_regression_HELIOS_CpG_",grp,"_meanlog.csv"))
+res_323sentinel <- res_EWAS[res_EWAS$X %in% c(cpg_323),]
+colnames(res_323sentinel)[1] <- "CpG"
+
+#Write sentinal cpgs to file
+write.csv(res_323sentinel,file=paste0("../../Sentinel_323nRandomset/",grp,"/Sentinel/Sentinel_results_",variable,"_HELIOS_323_regression_",grp,".csv"), row.names = F)
+
+#start random 1000set extraction
+
+res_lm_P_combine = matrix(ncol=1,nrow=323)
+res_lm_Beta_combine = matrix(ncol=1,nrow=323)
+
+rm(Markernames)
+
+#Loop to read 1000 files
+for (y in 1:1000){
+  
+  res_lm_P = NULL
+  res_lm_Beta = NULL
+  
+  print(paste0("Start_set_",y))
+  
+  #read file containing name of markers for CpG
+  #In NSCC
+  #temp_Markernames_file = paste0("../../Random_Sets_Final_323cg/Random-set_",y,".txt")
+  #In local
+  temp_Markernames_file = paste0("../../Sentinel_and_PCs_CpG_regression_phewas_PRS/Random_Sets_Final_323cg/Random-set_",y,".txt")
+  Markernames <- read.table(temp_Markernames_file, header = T)
+  
+  #Markernames <- read.table("Random-set_1.txt", header = T)
+  cpg_323 = as.character(Markernames$CpG)
+  res_323sentinel <- res_EWAS[res_EWAS$X %in% c(cpg_323),]
+  
+  res_lm_P=cbind(res_323sentinel$X,res_323sentinel$P)
+  res_lm_Beta=cbind(res_323sentinel$X,res_323sentinel$Estimate)
+  #colnames(res_lm_Core_log) <- c('Estimate','Std.Error','z_value','P')
+  colnames(res_lm_P) <- c(paste0("set_",y,'_CpG'),paste0("set_",y,'_P'))
+  colnames(res_lm_Beta) <- c(paste0("set_",y,'_CpG'),paste0("set_",y,'_Estimate'))
+  
+#cbind results to one file
+
+res_lm_P_combine <- data.frame(res_lm_P_combine,res_lm_P)
+res_lm_Beta_combine <- data.frame(res_lm_Beta_combine,res_lm_Beta)
+
+}
+
+res_lm_P_combine_v2 <- res_lm_P_combine[,-1]
+res_lm_Beta_combine_v2 <- res_lm_Beta_combine[,-1]
+
+write.csv(res_lm_P_combine_v2,file=paste0("../../Sentinel_323nRandomset/",grp,"/Sentinel/Sentinel_results_",variable,"_HELIOS_323_regression_",grp,"_Random1000set_P.csv"), row.names = F)
+write.csv(res_lm_Beta_combine_v2,file=paste0("../../Sentinel_323nRandomset/",grp,"/Sentinel/Sentinel_results_",variable,"_HELIOS_323_regression_",grp,"_Random1000set_Beta.csv"), row.names = F)
+
+timestamp()
+
+}
+
+#End of extraction
+
+#Start of calculating enrichment
+
+sum_sentinel_pos <- NULL
+sum_sentinel_neg <- NULL
+total_sentinel <- NULL
+prop_sentinel <- NULL
+mean_prop_bg <- NULL
+enrichment_fold <- NULL
+P_enrich <- NULL
+
+for (i in 1:nrow(variable_list)){
+  
+  grp <- variable_list[i,1]
+  variable <- variable_list[i,2]
+  
+  print(i)
+  
+  sentinal_eff <- NULL
+  #read in background
+  bg <- read.csv(paste0("../../Sentinel_323nRandomset/",grp,"/Sentinel/Sentinel_results_",variable,"_HELIOS_323_regression_",grp,"_Random1000set_P.csv",sep=""), header=T)
+  
+  sentinel <- read.csv(paste0("../../Sentinel_323nRandomset/",grp,"/Sentinel/Sentinel_results_",variable,"_HELIOS_323_regression_",grp,".csv"), header=T)
+  
+  sentinal_eff <- merge(eff[,c(1,5)],sentinel, by.x = "MarkerName", by.y = "CpG")
+  
+  sum_sentinel <- sum(sentinel$P<0.05)
+  #pos beta (higher risk for t2d) and pos estimate (higher association with traits) increase risk
+  sentinel_pos1 <- sum(sentinal_eff$P<0.05 & sentinal_eff$Beta > 0 & sentinal_eff$Estimate > 0)
+  sentinel_pos2 <- sum(sentinal_eff$P<0.05 & sentinal_eff$Beta < 0 & sentinal_eff$Estimate < 0)
+  sentinel_neg1 <- sum(sentinal_eff$P<0.05 & sentinal_eff$Beta < 0 & sentinal_eff$Estimate > 0)
+  sentinel_neg2 <- sum(sentinal_eff$P<0.05 & sentinal_eff$Beta > 0 & sentinal_eff$Estimate < 0)
+  sentinel_neg = -(sentinel_pos1 + sentinel_pos2) #damaging
+  sentinel_pos = sentinel_neg1 + sentinel_neg2 #protective
+  
+  sum_sentinel_pos <- rbind(sum_sentinel_pos, sentinel_pos)
+  sum_sentinel_neg <- rbind(sum_sentinel_neg, sentinel_neg)
+  total_sentinel <- rbind(total_sentinel,sum_sentinel)
+  
+  sum_bg <- NULL
+  for (j in 1:1000){
+    sum_bg[j] <- sum((bg[j*2] <= 0.05), na.rm=T)
+  }
+  
+  prop_sentinel[i] <- sum_sentinel/nrow(sentinel)
+  
+  prop_bg <- sum_bg/nrow(sentinel)
+  mean_prop_bg[i] <- mean(prop_bg)
+  
+  if(max(prop_bg)<prop_sentinel[i]){
+    y = (prop_sentinel[i] + 0.1)} 
+  else {
+    y = (max(prop_bg) + 0.1)
+  }   
+  
+  enrichment_fold[i] <- prop_sentinel[i]/mean_prop_bg[i]
+  P_enrich[i] <- sum(prop_bg>=prop_sentinel[i])/1000
+  
+  #png(paste0("../../Sentinel_323nRandomset/Enrichment_plot/Sentinel_Enrichment_hist_",grp,"_",variable,".png"))
+  #hist(prop_bg, xlim=c(0,y), main = paste0(variable), xlab = "")
+  #abline(v=prop_sentinel[i], col="red")
+  #dev.off()
+  
+}
+
+results <- cbind(sum_sentinel_pos, sum_sentinel_neg, total_sentinel, prop_sentinel, mean_prop_bg, enrichment_fold, P_enrich)
+colnames(results) <- c("Sentinel_Pos","Sentinel_neg","Total_sentinel","Prop Sentinel P<0.05", "Mean (Prop Background P<0.05)", "Enrichment Fold", "P for enrichment")
+rownames(results) <- variable_list[,2]
+
+write.csv(results, paste0("../../Sentinel_323nRandomset/Enrichment_plot/Sentinel_Enrichment_res_lm_20250102.csv"), row.names = T)
+
