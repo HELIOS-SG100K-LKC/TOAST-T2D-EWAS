@@ -60,5 +60,3 @@ df_coef_1selambda <- (coef_1selambda)[,1]
 write.csv(df_coef_1selambda, file="coef_1selambda.csv")
 
 ##End of lasso regression
-
-##Generate MRS
