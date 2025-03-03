@@ -29,15 +29,13 @@ beta_sig_SPHS_ALL_tv3 <- beta_sig_SPHS_ALL_tv3 %>%
 #______________
 
 #reformat data for lasso regression
-xfactors <- model.matrix(T2D_status ~ Sex2 + Ethnicity, data=beta_sig_SPHS_ALL_tv3)[, -1]
+xfactors <- model.matrix(T2D_status ~ scale(Age) + Sex2 + Ethnicity, data=beta_sig_SPHS_ALL_tv3)[, -1]
 x <- as.matrix(data.frame(xfactors,beta_sig_SPHS_ALL_tv3[,c(6:137)]))
 
 beta_merge_meth_tv3 = data.frame(beta_sig_SPHS_ALL_tv3$T2D_status,beta_sig_SPHS_ALL_tv3$Age,beta_merge_meth)
 colnames(beta_merge_meth_tv3)[1] <- "T2D_status"
-colnames(beta_merge_meth_tv3)[2] <- "Age"
 
 beta_merge_meth_tv3$T2D_status <- as.factor(beta_merge_meth_tv3$T2D_status)
-beta_merge_meth_tv3$Age <- as.numeric(beta_merge_meth_tv3$Age)
 beta_merge_meth_tv3$Sex2 <- as.factor(beta_merge_meth_tv3$Sex2)
 beta_merge_meth_tv3$Ethnicity <- as.factor(beta_merge_meth_tv3$Ethnicity)
 
