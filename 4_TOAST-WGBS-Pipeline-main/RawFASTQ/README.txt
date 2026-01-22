@@ -1,1 +1,1 @@
-This folder should contain the fastq files for processing.
+This folder contains the fastq files for processing.
