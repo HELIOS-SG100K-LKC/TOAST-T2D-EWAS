@@ -92,7 +92,7 @@ The code is organized by the chronological order of analysis:
 * `5_Fine-mapping`: SuSiE-based fine-mapping of associations.
 * `6_Methylation-Risk-Scores`: Generation and validation of MRS.
 * `7 - RNA-seq pipeline`: Transcriptomic integration.
-* `Data-Blobs`: Helper scripts and reference datasets.
+* `Data-Blobs`: Results from Primary EWAS Analysis, eQTM and eQTL Analysis.
 
 ---
 
